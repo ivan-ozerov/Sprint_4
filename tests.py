@@ -6,24 +6,6 @@ import pytest
 # обязательно указывать префикс Test
 class TestBooksCollector:
 
-        
-    @pytest.fixture(autouse=True)
-    def collector(self):
-        collector = BooksCollector()
-        return collector
-
-    @pytest.fixture
-    def add_books(self, collector):
-        collector.add_new_book('Война и Мир')
-        collector.add_new_book('Горе от ума')
-        collector.add_new_book('Ведьмак')
-
-    @pytest.fixture
-    def set_genre(self, collector, add_books):
-        collector.set_book_genre('Война и Мир','Ужасы')
-        collector.set_book_genre('Ведьмак','Ужасы')
-        collector.set_book_genre('Горе от ума','Комедии')
-
     # пример теста:
     # обязательно указывать префикс test_
     # дальше идет название метода, который тестируем add_new_book_
@@ -96,43 +78,36 @@ class TestBooksCollector:
     def test_get_books_for_children_correct_books_return(self, collector, add_books, set_genre):
         assert collector.get_books_for_children() == ['Горе от ума']
 
-    def test_add_book_in_favorites_book_added_and_not_in_favorites(self, collector, add_books, set_genre):
+    def test_add_book_in_favorites_book_added_and_not_in_favorites(self, collector, add_books):
         book_name = 'Ведьмак'
         collector.add_book_in_favorites(book_name)
         assert book_name in collector.favorites
 
-    def test_add_book_in_favorites_book_added_but_already_in_favorites(self, collector, add_books, set_genre):
+    def test_add_book_in_favorites_book_added_but_already_in_favorites(self, collector, add_books):
         book_name = 'Ведьмак'
         collector.add_book_in_favorites(book_name)
         collector.add_book_in_favorites(book_name)
-        assert book_name in collector.favorites
+        assert len(collector.favorites) == 1
 
-    def test_add_book_in_favorites_book_not_added_and_not_in_favorites(self, collector, add_books, set_genre):
+    def test_add_book_in_favorites_book_not_added_and_not_in_favorites(self, collector, add_books):
         book_name = 'Гарри Поттер'
         collector.add_book_in_favorites(book_name)
         assert book_name not in collector.favorites
 
     def test_delete_book_from_favorites_book_is_in_favorites_deleted(self, collector, add_books):
         book_name = 'Горе от ума'
-        if book_name not in collector.favorites:    
-            favorites_before = collector.favorites
-            collector.add_book_in_favorites(book_name)
-        else:
-            favorites_before = collector.favorites
-
+        collector.add_book_in_favorites(book_name)
         collector.delete_book_from_favorites(book_name)
-        assert favorites_before == collector.favorites
+        assert book_name not in collector.favorites
 
     def test_delete_book_from_favorites_book_not_in_favorites_not_affect_favorites_list(self, collector, add_books):
         book_name = 'Горе от ума'
-        if book_name not in collector.favorites:
-            favorites_before = collector.favorites
-            collector.delete_book_from_favorites(book_name)
-        else:
-            collector.delete_book_from_favorites(book_name)
-            collector.delete_book_from_favorites(book_name)
-            favorites_before = collector.favorites
-        
+        book_name2 = 'Война и Мир'
+        book_name3 = 'Ведьмак'
+        collector.add_book_in_favorites(book_name)
+        collector.add_book_in_favorites(book_name2)
+        favorites_before = collector.favorites
+        collector.delete_book_from_favorites(book_name3)
         assert favorites_before == collector.favorites
 
     def test_get_list_of_favorites_books_list_same_as_was_inserted(self, collector, add_books):
